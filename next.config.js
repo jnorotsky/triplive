@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  serverExternalPackages: ['@vercel/postgres'],
-};
+const nextConfig = {};
 
 module.exports = nextConfig;

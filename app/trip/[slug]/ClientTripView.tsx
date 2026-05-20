@@ -9,7 +9,7 @@ type Tab = typeof TABS[number];
 
 // ─── Hero Card ────────────────────────────────────────────────────────────────
 function HeroCard({ trip }: { trip: TripWithDetails }) {
-  function formatRange(start?: string, end?: string): string {
+  function formatRange(start?: string | null, end?: string | null): string {
     if (!start && !end) return "";
     const fmt = (d: string) => {
       const [y, m, day] = d.split("-").map(Number);
