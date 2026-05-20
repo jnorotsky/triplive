@@ -24,7 +24,7 @@ export default async function TripPage({ params }: Props) {
 
   return (
     <ClientTripView
-      trip={trip}
+      trip={trip!}
       today={today}
     />
   );

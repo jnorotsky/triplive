@@ -3,8 +3,8 @@ export interface Trip {
   slug: string;
   client_name: string;
   destination: string;
-  start_date: string;
-  end_date: string;
+  start_date: string | null;
+  end_date: string | null;
   status: "draft" | "active";
   created_at: string;
 }

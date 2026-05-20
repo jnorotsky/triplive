@@ -661,7 +661,13 @@ export default function EditTripPage() {
   const [documents, setDocuments] = useState<TripDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddItem, setShowAddItem] = useState(false);
-  const [tripForm, setTripForm] = useState({
+  const [tripForm, setTripForm] = useState<{
+    client_name: string;
+    destination: string;
+    start_date: string;
+    end_date: string;
+    status: "draft" | "active";
+  }>({
     client_name: "",
     destination: "",
     start_date: "",
@@ -695,8 +701,8 @@ export default function EditTripPage() {
       setTripForm({
         client_name: data.client_name,
         destination: data.destination,
-        start_date: data.start_date || "",
-        end_date: data.end_date || "",
+        start_date: data.start_date ?? "",
+        end_date: data.end_date ?? "",
         status: data.status,
       });
     } catch (err) {
@@ -976,7 +982,7 @@ export default function EditTripPage() {
                   Status
                 </label>
                 <div style={{ display: "flex", gap: 8 }}>
-                  {["draft", "active"].map((s) => (
+                  {(["draft", "active"] as const).map((s) => (
                     <button
                       key={s}
                       type="button"

@@ -26,7 +26,7 @@ function statusBadge(status: string) {
   );
 }
 
-function formatTripDates(start?: string, end?: string): string {
+function formatTripDates(start?: string | null, end?: string | null): string {
   if (!start && !end) return "Dates TBD";
   const fmt = (d: string) => {
     const [y, m, day] = d.split("-").map(Number);
