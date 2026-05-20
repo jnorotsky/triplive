@@ -173,9 +173,44 @@ function AddItemForm({
     location: "",
   });
   const [saving, setSaving] = useState(false);
+  const [showPaste, setShowPaste] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState("");
 
   function set(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleParse() {
+    if (!pasteText.trim()) return;
+    setParsing(true);
+    setParseError("");
+    try {
+      const res = await fetch("/api/parse-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: pasteText }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to parse");
+      setForm({
+        type: data.type || "note",
+        title: data.title || "",
+        subtitle: data.subtitle || "",
+        day_date: data.day_date || "",
+        time: data.time || "",
+        confirmation_number: data.confirmation_number || "",
+        location: data.location || "",
+        detail: data.detail || "",
+      });
+      setShowPaste(false);
+      setPasteText("");
+    } catch (err: unknown) {
+      setParseError(err instanceof Error ? err.message : "Could not parse. Fill in manually.");
+    } finally {
+      setParsing(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -208,16 +243,82 @@ function AddItemForm({
         marginBottom: 12,
       }}
     >
-      <h4
-        style={{
-          margin: "0 0 16px",
-          fontSize: 15,
-          fontWeight: 600,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Add Itinerary Item
-      </h4>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600, letterSpacing: "-0.02em" }}>
+          Add Itinerary Item
+        </h4>
+        <button
+          type="button"
+          onClick={() => { setShowPaste(!showPaste); setParseError(""); }}
+          style={{
+            background: showPaste ? "#f0fdf4" : "#f3f4f6",
+            color: showPaste ? "#16a34a" : "#374151",
+            border: showPaste ? "1px solid #bbf7d0" : "1px solid #e7e5e4",
+            borderRadius: 999,
+            padding: "6px 14px",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          📋 Paste Confirmation
+        </button>
+      </div>
+
+      {showPaste && (
+        <div style={{
+          background: "#f9fafb",
+          border: "1px solid #e7e5e4",
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+        }}>
+          <p style={{ margin: "0 0 10px", fontSize: 13, color: "#57534e", fontWeight: 500 }}>
+            Paste your booking confirmation below — hotel, flight, restaurant, anything!
+          </p>
+          <textarea
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+            placeholder="Paste the full confirmation email or text here…"
+            rows={6}
+            style={{
+              width: "100%",
+              border: "1px solid #e7e5e4",
+              borderRadius: 10,
+              padding: "10px 12px",
+              fontSize: 13,
+              outline: "none",
+              background: "#fff",
+              color: "#111",
+              resize: "vertical",
+              boxSizing: "border-box",
+              fontFamily: "inherit",
+            }}
+          />
+          {parseError && (
+            <p style={{ margin: "8px 0 0", fontSize: 12, color: "#dc2626" }}>{parseError}</p>
+          )}
+          <button
+            type="button"
+            onClick={handleParse}
+            disabled={parsing || !pasteText.trim()}
+            style={{
+              marginTop: 10,
+              width: "100%",
+              background: parsing || !pasteText.trim() ? "#d1d5db" : "#111",
+              color: "#fff",
+              border: 0,
+              borderRadius: 999,
+              padding: "10px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: parsing || !pasteText.trim() ? "not-allowed" : "pointer",
+            }}
+          >
+            {parsing ? "Reading confirmation…" : "✨ Auto-fill Fields"}
+          </button>
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div style={{ marginBottom: 14 }}>
