@@ -21,7 +21,8 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/admin") ||
     pathname === "/" ||
-    pathname.startsWith("/api/trips")
+    pathname.startsWith("/api/trips") ||
+    pathname.startsWith("/api/parse-confirmation")
   ) {
     const cookie = request.cookies.get(COOKIE_NAME);
     const password = process.env.ADMIN_PASSWORD;
