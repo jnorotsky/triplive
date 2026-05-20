@@ -54,7 +54,7 @@ ${text}`,
     if (!response.ok) {
       const err = await response.text();
       console.error("Anthropic API error:", err);
-      throw new Error(`Anthropic API returned ${response.status}`);
+      throw new Error(`Anthropic API error ${response.status}: ${err.slice(0, 200)}`);
     }
 
     const data = await response.json();
@@ -67,8 +67,9 @@ ${text}`,
     return NextResponse.json(parsed);
   } catch (err) {
     console.error("Parse confirmation error:", err);
+    const msg = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to parse confirmation. Please fill in the fields manually." },
+      { error: msg },
       { status: 500 }
     );
   }
