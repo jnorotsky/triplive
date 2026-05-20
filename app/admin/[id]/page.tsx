@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import type { Trip, ItineraryItem, Update, Document, TripWithDetails } from "@/lib/types";
+import type { Trip, ItineraryItem, Update, TripDocument, TripWithDetails } from "@/lib/types";
 
 const ITEM_TYPES = [
   { value: "hotel", label: "🏨 Hotel" },
@@ -658,7 +658,7 @@ export default function EditTripPage() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [items, setItems] = useState<ItineraryItem[]>([]);
   const [updates, setUpdates] = useState<Update[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<TripDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddItem, setShowAddItem] = useState(false);
   const [tripForm, setTripForm] = useState({

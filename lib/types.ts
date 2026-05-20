@@ -31,7 +31,7 @@ export interface Update {
   created_at: string;
 }
 
-export interface Document {
+export interface TripDocument {
   id: string;
   trip_id: string;
   title: string;
@@ -43,5 +43,5 @@ export interface Document {
 export interface TripWithDetails extends Trip {
   items: ItineraryItem[];
   updates: Update[];
-  documents: Document[];
+  documents: TripDocument[];
 }

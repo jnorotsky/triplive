@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4c7a3b0811a15da334bcd272a4e5ac74256be27c
 {
   "name": "triplive",
   "version": "1.0.0",
@@ -8,6 +12,7 @@
     "start": "next start"
   },
   "dependencies": {
+<<<<<<< HEAD
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
@@ -20,5 +25,12 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^9"
+=======
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.378.0",
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18"
+>>>>>>> 4c7a3b0811a15da334bcd272a4e5ac74256be27c
   }
 }

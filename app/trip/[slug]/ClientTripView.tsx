@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { TripWithDetails, ItineraryItem, Update, Document } from "@/lib/types";
+import type { TripWithDetails, ItineraryItem, Update, TripDocument } from "@/lib/types";
 import { formatDate, typeIcon } from "@/lib/utils";
 
 const TABS = ["Today", "Itinerary", "Updates", "Docs"] as const;
@@ -519,7 +519,7 @@ function UpdatesTab({ updates }: { updates: Update[] }) {
 }
 
 // ─── Docs Tab ─────────────────────────────────────────────────────────────────
-function DocsTab({ documents }: { documents: Document[] }) {
+function DocsTab({ documents }: { documents: TripDocument[] }) {
   if (documents.length === 0) {
     return (
       <div

@@ -1,5 +1,5 @@
 import { sql } from "@vercel/postgres";
-import type { Trip, ItineraryItem, Update, Document, TripWithDetails } from "./types";
+import type { Trip, ItineraryItem, Update, TripDocument, TripWithDetails } from "./types";
 
 let initialized = false;
 
@@ -100,7 +100,7 @@ export async function getTripWithDetails(id: string): Promise<TripWithDetails | 
     ...trip,
     items: items as ItineraryItem[],
     updates: updates as Update[],
-    documents: documents as Document[],
+    documents: documents as TripDocument[],
   };
 }
 
@@ -263,12 +263,12 @@ export async function createDocument(data: {
   title: string;
   url: string;
   doc_type: string;
-}): Promise<Document> {
+}): Promise<TripDocument> {
   await initDB();
   const { rows } = await sql`
     INSERT INTO documents (id, trip_id, title, url, doc_type)
     VALUES (${data.id}, ${data.trip_id}, ${data.title}, ${data.url}, ${data.doc_type || null})
     RETURNING *
   `;
-  return rows[0] as Document;
+  return rows[0] as TripDocument;
 }
