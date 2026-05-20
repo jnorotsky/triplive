@@ -17,9 +17,11 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function TripPage({ params }: Props) {
-  const trip = await getTripWithDetailsBySlug(params.slug);
-  if (!trip) notFound();
+  const tripRaw = await getTripWithDetailsBySlug(params.slug);
+  if (!tripRaw) notFound();
 
+  // Convert any Date objects → strings so Next.js can serialize them for the client component
+  const trip = JSON.parse(JSON.stringify(tripRaw)) as typeof tripRaw;
   const today = todayString();
 
   return (
