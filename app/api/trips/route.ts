@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(trip, { status: 201 });
   } catch (error) {
     console.error("POST /api/trips error:", error);
-    return NextResponse.json({ error: "Failed to create trip" }, { status: 500 });
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      { error: `Failed to create trip: ${msg}` },
+      { status: 500 }
+    );
   }
 }

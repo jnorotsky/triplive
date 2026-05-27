@@ -85,14 +85,17 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTrip),
       });
-      if (!res.ok) throw new Error("Failed");
-      const trip = await res.json();
-      setTrips((prev) => [trip, ...prev]);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      setTrips((prev) => [data, ...prev]);
       setShowNewModal(false);
       setNewTrip({ client_name: "", destination: "", start_date: "", end_date: "" });
-      router.push(`/admin/${trip.id}`);
-    } catch {
-      alert("Failed to create trip. Please try again.");
+      router.push(`/admin/${data.id}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      alert(`Failed to create trip: ${msg}`);
     } finally {
       setCreating(false);
     }
