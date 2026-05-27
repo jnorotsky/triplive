@@ -30,6 +30,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       id: uuidv4(),
       trip_id: params.id,
       day_date: body.day_date || "",
+      end_date: body.end_date || "",
       time: body.time || "",
       type: body.type || "note",
       title: body.title,

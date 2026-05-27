@@ -164,6 +164,7 @@ function AddItemForm({
 }) {
   const [form, setForm] = useState({
     day_date: "",
+    end_date: "",
     time: "",
     type: "note",
     title: "",
@@ -199,6 +200,7 @@ function AddItemForm({
         title: data.title || "",
         subtitle: data.subtitle || "",
         day_date: data.day_date || "",
+        end_date: data.end_date || "",
         time: data.time || "",
         confirmation_number: data.confirmation_number || "",
         location: data.location || "",
@@ -356,27 +358,55 @@ function AddItemForm({
           </select>
         </div>
         <Input
-          label="Date"
+          label={form.type === "hotel" ? "Check-in Date" : "Date"}
           type="date"
           value={form.day_date}
           onChange={(v) => set("day_date", v)}
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <Input
-          label="Time (optional)"
-          type="time"
-          value={form.time}
-          onChange={(v) => set("time", v)}
-        />
+      {form.type === "hotel" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <Input
+            label="Check-out Date"
+            type="date"
+            value={form.end_date}
+            onChange={(v) => set("end_date", v)}
+          />
+          <Input
+            label="Check-in Time (optional)"
+            type="time"
+            value={form.time}
+            onChange={(v) => set("time", v)}
+          />
+        </div>
+      )}
+
+      {form.type !== "hotel" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <Input
+            label="Time (optional)"
+            type="time"
+            value={form.time}
+            onChange={(v) => set("time", v)}
+          />
+          <Input
+            label="Confirmation #"
+            value={form.confirmation_number}
+            onChange={(v) => set("confirmation_number", v)}
+            placeholder="e.g. ABC123"
+          />
+        </div>
+      )}
+
+      {form.type === "hotel" && (
         <Input
           label="Confirmation #"
           value={form.confirmation_number}
           onChange={(v) => set("confirmation_number", v)}
           placeholder="e.g. ABC123"
         />
-      </div>
+      )}
 
       <Input
         label="Title *"
@@ -465,6 +495,7 @@ function ItemCard({
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     day_date: item.day_date || "",
+    end_date: item.end_date || "",
     time: item.time || "",
     type: item.type,
     title: item.title,
@@ -561,25 +592,50 @@ function ItemCard({
             </select>
           </div>
           <Input
-            label="Date"
+            label={form.type === "hotel" ? "Check-in Date" : "Date"}
             type="date"
             value={form.day_date}
             onChange={(v) => set("day_date", v)}
           />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <Input
-            label="Time"
-            type="time"
-            value={form.time}
-            onChange={(v) => set("time", v)}
-          />
+        {form.type === "hotel" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Input
+              label="Check-out Date"
+              type="date"
+              value={form.end_date}
+              onChange={(v) => set("end_date", v)}
+            />
+            <Input
+              label="Check-in Time"
+              type="time"
+              value={form.time}
+              onChange={(v) => set("time", v)}
+            />
+          </div>
+        )}
+        {form.type !== "hotel" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Input
+              label="Time"
+              type="time"
+              value={form.time}
+              onChange={(v) => set("time", v)}
+            />
+            <Input
+              label="Confirmation #"
+              value={form.confirmation_number}
+              onChange={(v) => set("confirmation_number", v)}
+            />
+          </div>
+        )}
+        {form.type === "hotel" && (
           <Input
             label="Confirmation #"
             value={form.confirmation_number}
             onChange={(v) => set("confirmation_number", v)}
           />
-        </div>
+        )}
         <Input
           label="Title *"
           value={form.title}

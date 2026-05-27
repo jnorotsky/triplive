@@ -25,6 +25,7 @@ export async function initDB(): Promise<void> {
       id                  UUID PRIMARY KEY,
       trip_id             UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
       day_date            DATE,
+      end_date            DATE,
       time                TEXT,
       type                TEXT NOT NULL DEFAULT 'note',
       title               TEXT NOT NULL,
@@ -35,6 +36,12 @@ export async function initDB(): Promise<void> {
       sort_order          INTEGER NOT NULL DEFAULT 0,
       created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
+  `;
+
+  // Migration: add end_date column if it doesn't exist on an older table
+  await sql`
+    ALTER TABLE itinerary_items
+    ADD COLUMN IF NOT EXISTS end_date DATE
   `;
 
   await sql`
@@ -176,6 +183,7 @@ export async function createItem(data: {
   id: string;
   trip_id: string;
   day_date: string;
+  end_date: string;
   time: string;
   type: string;
   title: string;
@@ -188,9 +196,9 @@ export async function createItem(data: {
   await initDB();
   const { rows } = await sql`
     INSERT INTO itinerary_items
-      (id, trip_id, day_date, time, type, title, subtitle, detail, confirmation_number, location, sort_order)
+      (id, trip_id, day_date, end_date, time, type, title, subtitle, detail, confirmation_number, location, sort_order)
     VALUES
-      (${data.id}, ${data.trip_id}, ${data.day_date || null}, ${data.time || null},
+      (${data.id}, ${data.trip_id}, ${data.day_date || null}, ${data.end_date || null}, ${data.time || null},
        ${data.type}, ${data.title}, ${data.subtitle || null}, ${data.detail || null},
        ${data.confirmation_number || null}, ${data.location || null}, ${data.sort_order})
     RETURNING *
@@ -208,6 +216,7 @@ export async function updateItem(
   const cur = existing[0] as ItineraryItem;
 
   const day_date = data.day_date !== undefined ? data.day_date : cur.day_date;
+  const end_date = data.end_date !== undefined ? data.end_date : cur.end_date;
   const time = data.time !== undefined ? data.time : cur.time;
   const type = data.type ?? cur.type;
   const title = data.title ?? cur.title;
@@ -220,6 +229,7 @@ export async function updateItem(
   const { rows } = await sql`
     UPDATE itinerary_items
     SET day_date = ${day_date || null},
+        end_date = ${end_date || null},
         time = ${time || null},
         type = ${type},
         title = ${title},

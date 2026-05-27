@@ -13,6 +13,7 @@ export interface ItineraryItem {
   id: string;
   trip_id: string;
   day_date: string;
+  end_date: string | null;
   time: string | null;
   type: "hotel" | "flight" | "activity" | "restaurant" | "transfer" | "note";
   title: string;

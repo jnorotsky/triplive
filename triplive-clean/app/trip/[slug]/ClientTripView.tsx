@@ -152,9 +152,38 @@ function TabBar({
 
 // ─── Single Item Card ─────────────────────────────────────────────────────────
 function ItemCard({ item }: { item: ItineraryItem }) {
-  const [expanded, setExpanded] = useState(false);
-  const hasExtra =
-    item.detail || item.confirmation_number || item.location || item.subtitle;
+  // Format a date like "May 26"
+  function shortDate(d: string): string {
+    const [y, m, day] = d.split("-").map(Number);
+    if (!y || !m || !day) return "";
+    return new Date(y, m - 1, day).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  const showCheckout = item.type === "hotel" && item.end_date;
+
+  // Split the detail blob into clean bullet lines.
+  // Supports newline-separated, bullet-prefixed, or sentence-separated input.
+  const detailLines: string[] = [];
+  if (item.detail) {
+    let raw = item.detail.trim();
+    if (raw.includes("\n")) {
+      raw.split("\n").forEach((line) => {
+        const cleaned = line.trim().replace(/^[•\-*]\s*/, "");
+        if (cleaned) detailLines.push(cleaned);
+      });
+    } else {
+      // Fall back: split on ". " before a capital letter, keep each as its own line
+      raw
+        .split(/\.\s+(?=[A-Z(])/)
+        .forEach((piece) => {
+          const cleaned = piece.trim().replace(/\.$/, "");
+          if (cleaned) detailLines.push(cleaned);
+        });
+    }
+  }
 
   return (
     <article
@@ -162,12 +191,13 @@ function ItemCard({ item }: { item: ItineraryItem }) {
         background: "#fff",
         border: "1px solid #e7e5e4",
         borderRadius: 20,
-        padding: "16px 18px",
+        padding: "18px 20px",
         boxShadow: "0 4px 18px rgba(0,0,0,.05)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-        <span style={{ fontSize: 24, lineHeight: 1, marginTop: 2, flexShrink: 0 }}>
+      {/* Header row: icon + title (+ time pill for non-hotels) */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+        <span style={{ fontSize: 28, lineHeight: 1, marginTop: 1, flexShrink: 0 }}>
           {typeIcon(item.type)}
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -182,22 +212,24 @@ function ItemCard({ item }: { item: ItineraryItem }) {
             <h3
               style={{
                 margin: 0,
-                fontSize: 16,
-                fontWeight: 600,
+                fontSize: 17,
+                fontWeight: 700,
                 letterSpacing: "-0.02em",
                 lineHeight: 1.3,
+                color: "#111",
               }}
             >
               {item.title}
             </h3>
-            {item.time && (
+            {item.time && !showCheckout && (
               <span
                 style={{
                   fontSize: 12,
-                  color: "#78716c",
+                  color: "#111",
+                  fontWeight: 600,
                   whiteSpace: "nowrap",
                   background: "#f3f4f6",
-                  padding: "2px 8px",
+                  padding: "3px 10px",
                   borderRadius: 999,
                   flexShrink: 0,
                 }}
@@ -206,12 +238,14 @@ function ItemCard({ item }: { item: ItineraryItem }) {
               </span>
             )}
           </div>
+          {/* Subtitle (room type, cabin class, party size, etc.) — BOLD */}
           {item.subtitle && (
             <p
               style={{
-                margin: "4px 0 0",
-                fontSize: 13,
-                color: "#57534e",
+                margin: "5px 0 0",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#1f2937",
                 lineHeight: 1.4,
               }}
             >
@@ -221,78 +255,151 @@ function ItemCard({ item }: { item: ItineraryItem }) {
         </div>
       </div>
 
-      {hasExtra && (
-        <button
-          onClick={() => setExpanded((v) => !v)}
+      {/* Check-in → Check-out block for hotels — BOLD dates */}
+      {showCheckout && (
+        <div
           style={{
-            background: "none",
-            border: "none",
-            color: "#78716c",
-            fontSize: 12,
-            cursor: "pointer",
-            padding: "8px 0 0 36px",
-            display: "block",
+            marginTop: 14,
+            padding: "12px 14px",
+            background: "#fafaf9",
+            border: "1px solid #e7e5e4",
+            borderRadius: 12,
+            display: "flex",
+            gap: 16,
+            alignItems: "center",
           }}
         >
-          {expanded ? "Show less ▲" : "Show more ▼"}
-        </button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 10,
+                color: "#78716c",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                fontWeight: 600,
+              }}
+            >
+              Check-in
+            </p>
+            <p
+              style={{
+                margin: "2px 0 0",
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#111",
+                lineHeight: 1.2,
+              }}
+            >
+              {shortDate(item.day_date)}
+              {item.time && (
+                <span style={{ fontWeight: 500, color: "#57534e", fontSize: 13 }}>
+                  {" · "}{item.time}
+                </span>
+              )}
+            </p>
+          </div>
+          <div style={{ color: "#a8a29e", fontSize: 18, flexShrink: 0 }}>→</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 10,
+                color: "#78716c",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                fontWeight: 600,
+              }}
+            >
+              Check-out
+            </p>
+            <p
+              style={{
+                margin: "2px 0 0",
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#111",
+                lineHeight: 1.2,
+              }}
+            >
+              {shortDate(item.end_date!)}
+            </p>
+          </div>
+        </div>
       )}
 
-      {expanded && (
-        <div style={{ paddingTop: 12, paddingLeft: 36 }}>
-          {item.location && (
-            <p
-              style={{
-                margin: "0 0 6px",
-                fontSize: 13,
-                color: "#57534e",
-                display: "flex",
-                gap: 6,
-                alignItems: "flex-start",
-              }}
-            >
-              <span>📍</span>
-              <span>{item.location}</span>
-            </p>
-          )}
-          {item.detail && (
-            <p
-              style={{
-                margin: "0 0 6px",
-                fontSize: 13,
-                color: "#78716c",
-                lineHeight: 1.6,
-                whiteSpace: "pre-line",
-              }}
-            >
-              {item.detail}
-            </p>
-          )}
-          {item.confirmation_number && (
-            <div
-              style={{
-                background: "#f9fafb",
-                border: "1px solid #e7e5e4",
-                borderRadius: 10,
-                padding: "8px 12px",
-                display: "inline-block",
-              }}
-            >
-              <p style={{ margin: 0, fontSize: 11, color: "#78716c" }}>
-                Confirmation #
-              </p>
-              <p
-                style={{
-                  margin: "2px 0 0",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  letterSpacing: "0.04em",
-                }}
-              >
-                {item.confirmation_number}
-              </p>
-            </div>
-          )}
+      {/* Location — always shown */}
+      {item.location && (
+        <p
+          style={{
+            margin: "12px 0 0",
+            fontSize: 13,
+            color: "#57534e",
+            display: "flex",
+            gap: 8,
+            alignItems: "flex-start",
+            lineHeight: 1.5,
+          }}
+        >
+          <span style={{ flexShrink: 0 }}>📍</span>
+          <span>{item.location}</span>
+        </p>
+      )}
+
+      {/* Details as bullets — always shown */}
+      {detailLines.length > 0 && (
+        <ul
+          style={{
+            margin: "12px 0 0",
+            paddingLeft: 22,
+            fontSize: 13,
+            color: "#57534e",
+            lineHeight: 1.55,
+          }}
+        >
+          {detailLines.map((line, i) => (
+            <li key={i} style={{ marginBottom: 4 }}>
+              {line}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Confirmation # — always shown, BOLD value */}
+      {item.confirmation_number && (
+        <div
+          style={{
+            marginTop: 14,
+            padding: "10px 14px",
+            background: "#fffbeb",
+            border: "1px solid #fde68a",
+            borderRadius: 10,
+            display: "inline-block",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 10,
+              color: "#92400e",
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              fontWeight: 600,
+            }}
+          >
+            Confirmation #
+          </p>
+          <p
+            style={{
+              margin: "2px 0 0",
+              fontSize: 15,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              color: "#111",
+            }}
+          >
+            {item.confirmation_number}
+          </p>
         </div>
       )}
     </article>
@@ -301,30 +408,57 @@ function ItemCard({ item }: { item: ItineraryItem }) {
 
 // ─── Day Section ──────────────────────────────────────────────────────────────
 function DaySection({ date, items }: { date: string; items: ItineraryItem[] }) {
+  // Split into weekday ("Tuesday") and rest ("May 19")
+  let weekday = "";
+  let rest = "Other";
+  if (date !== "no-date") {
+    const [y, m, day] = date.split("-").map(Number);
+    if (y && m && day) {
+      const dt = new Date(y, m - 1, day);
+      weekday = dt.toLocaleDateString("en-US", { weekday: "long" });
+      rest = dt.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+    } else {
+      rest = formatDate(date);
+    }
+  }
+
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div style={{ marginBottom: 32 }}>
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: "baseline",
           gap: 12,
-          marginBottom: 12,
+          marginBottom: 14,
+          paddingBottom: 10,
+          borderBottom: "2px solid #111",
         }}
       >
-        <div
+        {weekday && (
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.16em",
+              color: "#78716c",
+            }}
+          >
+            {weekday}
+          </h2>
+        )}
+        <h2
           style={{
-            background: "#111",
-            color: "#fff",
-            borderRadius: 999,
-            padding: "5px 14px",
-            fontSize: 12,
-            fontWeight: 600,
-            whiteSpace: "nowrap",
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            color: "#111",
           }}
         >
-          {date === "no-date" ? "Other" : formatDate(date)}
-        </div>
-        <div style={{ flex: 1, height: 1, background: "#e7e5e4" }} />
+          {rest}
+        </h2>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {items.map((item) => (
